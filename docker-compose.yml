@@ -1,0 +1,90 @@
+version: "2.1"
+services:
+    redis:
+        image: "redis:5.0.5"
+
+    postgres:
+        image: postgres:9.6
+        env_file:
+            - ./source/.env
+        volumes:
+            - PGDATA:/var/lib/postgresql/data
+
+    webserver:
+        build: .
+        restart: always
+        depends_on:
+            - postgres
+            - redis
+        env_file:
+            - ./source/.env
+        volumes:
+            - ./setup/config/airflow.cfg:/usr/local/airflow/airflow.cfg
+            - ./source/dags:/usr/local/airflow/dags
+            - .:/application
+            - ./source/requirements.txt:/requirements.txt
+            - app-python-site-packages:/usr/local/airflow/.local/lib/python3.7/site-packages
+            - app-usr-local-bin:/usr/local/bin
+        ports:
+            - "8080:8080"
+        command: webserver
+        healthcheck:
+            test:
+                ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
+            interval: 30s
+            timeout: 30s
+            retries: 3
+        working_dir: /application
+
+    flower:
+        build: .
+        restart: always
+        depends_on:
+            - redis
+        env_file:
+            - ./source/.env
+        ports:
+            - "5555:5555"
+        command: flower
+        working_dir: /application
+
+    scheduler:
+        build: .
+        restart: always
+        depends_on:
+            - webserver
+        volumes:
+            - ./setup/config/airflow.cfg:/usr/local/airflow/airflow.cfg
+            - ./source/dags:/usr/local/airflow/dags
+            - .:/application
+            - ./source/requirements.txt:/requirements.txt
+            - app-python-site-packages:/usr/local/airflow/.local/lib/python3.7/site-packages
+            - app-usr-local-bin:/usr/local/bin
+        env_file:
+            - ./source/.env
+        command: scheduler
+        working_dir: /application
+
+    worker:
+        build: .
+        restart: always
+        depends_on:
+            - scheduler
+        volumes:
+            - ./setup/config/airflow.cfg:/usr/local/airflow/airflow.cfg
+            - ./source/dags:/usr/local/airflow/dags
+            - .:/application
+            - ./source/requirements.txt:/requirements.txt
+            - app-python-site-packages:/usr/local/airflow/.local/lib/python3.7/site-packages
+            - app-usr-local-bin:/usr/local/bin
+        env_file:
+            - ./source/.env
+        command: worker
+        working_dir: /application
+volumes:
+    PGDATA:
+        driver: local
+    app-python-site-packages:
+        driver: local
+    app-usr-local-bin:
+        driver: local
