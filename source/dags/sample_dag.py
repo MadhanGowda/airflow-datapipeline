@@ -1,12 +1,10 @@
-"""CCLS reporting datapipeline file."""
+"""Backbone Sample datapipeline DAG."""
 import os
 import sys
 from datetime import timedelta
 
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
-from airflow.operators.dagrun_operator import TriggerDagRunOperator
-from airflow.operators.python_operator import PythonOperator
 from airflow.utils.dates import days_ago
 
 sys.path.insert(0, "/application/")
