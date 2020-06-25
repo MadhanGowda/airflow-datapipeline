@@ -21,13 +21,13 @@ RUN set -ex \
 RUN mkdir /application
 RUN chown -R airflow: /application
 
-COPY source/requirements.txt /usr/local/airflow/requirements.txt
+COPY requirements/requirements.txt /usr/local/airflow/requirements.txt
 RUN pip install -r /usr/local/airflow/requirements.txt
 
 USER airflow
 
 # Create log directory
 RUN mkdir /usr/local/airflow/logs
-COPY ./source/dags /usr/local/airflow/dags
-COPY ./setup/config/airflow.cfg /usr/local/airflow/
+COPY ./dags /usr/local/airflow/dags
+COPY ./config/airflow.cfg /usr/local/airflow/
 COPY ./source /application/source

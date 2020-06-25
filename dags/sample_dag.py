@@ -1,15 +1,18 @@
-"""Backbone Sample datapipeline DAG."""
+"""Airflow Sample datapipeline DAG."""
 import os
 import sys
 from datetime import timedelta
 
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
+from airflow.operators.python_operator import PythonOperator
 from airflow.utils.dates import days_ago
 
 sys.path.insert(0, "/application/")
 
 from source import utils  # noqa isort:skip
+from source.sample.sample_helper import noop  # noqa isort:skip
+from source.sample.sample_data import sample_variable  # noqa isort:skip
 
 default_args = {
     "owner": "airflow",
@@ -24,7 +27,7 @@ default_args = {
 }
 
 datapipeline_dag = DAG(
-    "Backbone-Sample-DAG",
+    "Airflow-Sample-DAG",
     description="",
     default_args=default_args,
     schedule_interval='0 8 * * *',
@@ -34,4 +37,14 @@ datapipeline_dag = DAG(
 start_task = DummyOperator(task_id="Start", dag=datapipeline_dag)
 end_task = DummyOperator(task_id="End", dag=datapipeline_dag)
 
-start_task >> end_task
+sample_task = PythonOperator(
+    task_id="sample_task",
+    dag=datapipeline_dag,
+    provide_context=True,
+    python_callable=noop,
+    op_kwargs={
+        'sample_variable': sample_variable,
+    },
+)
+
+start_task >> sample_task >> end_task

@@ -19,10 +19,10 @@ services:
         env_file:
             - ./source/.env
         volumes:
-            - ./setup/config/airflow.cfg:/usr/local/airflow/airflow.cfg
-            - ./source/dags:/usr/local/airflow/dags
+            - ./config/airflow.cfg:/usr/local/airflow/airflow.cfg
+            - ./dags:/usr/local/airflow/dags
             - .:/application
-            - ./source/requirements.txt:/requirements.txt
+            - ./requirements/requirements.txt:/requirements.txt
             - app-python-site-packages:/usr/local/airflow/.local/lib/python3.7/site-packages
             - app-usr-local-bin:/usr/local/bin
         ports:
@@ -54,10 +54,10 @@ services:
         depends_on:
             - webserver
         volumes:
-            - ./setup/config/airflow.cfg:/usr/local/airflow/airflow.cfg
-            - ./source/dags:/usr/local/airflow/dags
+            - ./config/airflow.cfg:/usr/local/airflow/airflow.cfg
+            - ./dags:/usr/local/airflow/dags
             - .:/application
-            - ./source/requirements.txt:/requirements.txt
+            - ./requirements/requirements.txt:/requirements.txt
             - app-python-site-packages:/usr/local/airflow/.local/lib/python3.7/site-packages
             - app-usr-local-bin:/usr/local/bin
         env_file:
@@ -71,10 +71,10 @@ services:
         depends_on:
             - scheduler
         volumes:
-            - ./setup/config/airflow.cfg:/usr/local/airflow/airflow.cfg
-            - ./source/dags:/usr/local/airflow/dags
+            - ./config/airflow.cfg:/usr/local/airflow/airflow.cfg
+            - ./dags:/usr/local/airflow/dags
             - .:/application
-            - ./source/requirements.txt:/requirements.txt
+            - ./requirements/requirements.txt:/requirements.txt
             - app-python-site-packages:/usr/local/airflow/.local/lib/python3.7/site-packages
             - app-usr-local-bin:/usr/local/bin
         env_file:

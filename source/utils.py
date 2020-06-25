@@ -20,10 +20,7 @@ def get_environ(env, default=None):
 
 def get_failure_email_list():
     """Failure email list."""
-    email_list = get_environ(
-        "DATAPIPELINE_EMAILS",
-        ['devops@galepartners.com']
-    )
+    email_list = get_environ("DATAPIPELINE_EMAILS", [])
     return email_list
 
 
@@ -315,7 +312,7 @@ def format_data_from_db(header, data):
 
 def notify_success_email(email_data):
     """Send custom email alerts."""
-    title = "Backbone Airflow Success Alert: {0}".format(
+    title = "Airflow Success Alert: {0}".format(
         email_data['dag_id']
     )
 
@@ -327,7 +324,7 @@ def notify_success_email(email_data):
     <b>{0}</b> job ran <b>successfully</b> at {1}.<br>
     <br>
     Thanks and Regards,<br>
-    <b>Backbone Airflow Bot</b><br>
+    <b>Airflow Bot</b><br>
     """.format(
         email_data['dag_id'],
         date

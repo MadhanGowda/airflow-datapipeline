@@ -1,4 +1,4 @@
-# GALE Backbone Datapipeline
+# Airflow Datapipeline
 
 ## Setup
 
