@@ -11,8 +11,8 @@ from airflow.utils.dates import days_ago
 sys.path.insert(0, "/application/")
 
 from source import utils  # noqa isort:skip
-from source.sample.sample_helper import noop  # noqa isort:skip
-from source.sample.sample_data import sample_variable  # noqa isort:skip
+from source.dag_helper.sample_helper.sample_helper import sample_test_task  # noqa isort:skip
+from source.dag_helper.sample_helper.sample_data import sample_variable  # noqa isort:skip
 
 default_args = {
     "owner": "airflow",
@@ -41,7 +41,7 @@ sample_task = PythonOperator(
     task_id="sample_task",
     dag=datapipeline_dag,
     provide_context=True,
-    python_callable=noop,
+    python_callable=sample_test_task,
     op_kwargs={
         'sample_variable': sample_variable,
     },

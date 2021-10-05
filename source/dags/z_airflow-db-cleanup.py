@@ -10,8 +10,8 @@ airflow trigger_dag --conf '{"maxDBEntryAgeInDays":30}' airflow-db-cleanup
 
 """
 from airflow.models import DAG, DagRun, TaskInstance, Log, XCom, SlaMiss, \
-    DagModel, Variable
-from airflow.jobs import BaseJob
+    Variable, DagModel
+from airflow.jobs.base_job import BaseJob
 from airflow import settings
 from airflow.operators.python_operator import PythonOperator
 from datetime import datetime, timedelta
@@ -48,6 +48,13 @@ DEFAULT_MAX_DB_ENTRY_AGE_IN_DAYS = int(
 # temporarily avoid deleting the db entries.
 ENABLE_DELETE = True
 # List of all the objects that will be deleted. Comment out the DB objects you
+
+# get dag model last schedule run
+try:
+    dag_model_last_scheduler_run = DagModel.last_scheduler_run
+except AttributeError:
+    dag_model_last_scheduler_run = DagModel.last_parsed_time
+
 # want to skip.
 DATABASE_OBJECTS = [
     {
@@ -93,7 +100,7 @@ DATABASE_OBJECTS = [
     },
     {
         "airflow_db_model": DagModel,
-        "age_check_column": DagModel.last_scheduler_run,
+        "age_check_column": dag_model_last_scheduler_run,
         "keep_last": False,
         "keep_last_filters": None,
         "keep_last_group_by": None
