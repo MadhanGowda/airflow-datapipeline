@@ -30,6 +30,7 @@ services:
         env_file:
             - ./source/.env
         volumes:
+            - ./source/data:/var/lib/postgresql/data/pgdata
             - PGDATA:/var/lib/postgresql/data
     redis:
         image: redis:5.0.5
