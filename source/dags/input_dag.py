@@ -10,15 +10,18 @@ from airflow.utils.dates import days_ago
 
 sys.path.insert(0, "/application/")
 
-from source.dag_helper.sample_helper.sample_helper import sample_test_task  # noqa isort:skip
-from source.dag_helper.sample_helper.sample_data import sample_variable  # noqa isort:skip
+from source.dag_helper.sample_helper.input_helper import (
+    read_data,
+    split_data,
+    group_data
+)   # noqa isort:skip
 
 default_args = {
     "owner": "airflow",
     "start_date": days_ago(100),
     "retries": os.environ.get("SPEND_LOAD_DAG_RETRIES", 0),
     "retry_delay": timedelta(minutes=1),
-    "provide_context": False,
+    "provide_context": True,
     "depends_on_past": False,
     "email": [],
     "email_on_retry": True,
@@ -26,7 +29,7 @@ default_args = {
 }
 
 datapipeline_dag = DAG(
-    "Airflow-Sample-DAG",
+    "Data_Input_Separation_with_3_tasks",
     description="",
     default_args=default_args,
     schedule_interval=None,
@@ -37,14 +40,24 @@ datapipeline_dag = DAG(
 start_task = DummyOperator(task_id="Start", dag=datapipeline_dag)
 end_task = DummyOperator(task_id="End", dag=datapipeline_dag)
 
-sample_task = PythonOperator(
-    task_id="sample_task",
+read_raw_data = PythonOperator(
+    task_id="read_raw_data",
     dag=datapipeline_dag,
     provide_context=True,
-    python_callable=sample_test_task,
-    op_kwargs={
-        'sample_variable': sample_variable,
-    },
+    python_callable=read_data,
+)
+split_data_by_date = PythonOperator(
+    task_id="split_data_by_date",
+    dag=datapipeline_dag,
+    provide_context=True,
+    python_callable=split_data,
+)
+group_data_by_date = PythonOperator(
+    task_id="group_data_by_date",
+    dag=datapipeline_dag,
+    provide_context=True,
+    python_callable=group_data,
 )
 
-start_task >> sample_task >> end_task
+start_task >> read_raw_data >> split_data_by_date
+split_data_by_date >> group_data_by_date >> end_task
