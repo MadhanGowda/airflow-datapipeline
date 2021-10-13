@@ -3,15 +3,20 @@ import os
 import sys
 from datetime import timedelta
 
+
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.utils.dates import days_ago
 
+
 sys.path.insert(0, "/application/")
 
-from source.dag_helper.sample_helper.sample_data import sample_variable  # noqa isort:skip
-from source.dag_helper.sample_helper.sample_helper import sample_test_task  # noqa isort:skip
+from source.dag_helper.sample_helper.input_helper import (  # noqa isort:skip
+    read_csv_data,
+    split_csv_data,
+    split_csv_data_by_date
+    )
 
 
 default_args = {
@@ -26,25 +31,41 @@ default_args = {
     "email_on_failure": True
 }
 
+
 datapipeline_dag = DAG(
-    "Airflow-Sample-DAG",
+    "Data_Input_Separation_with_3_tasks",
     description="",
     default_args=default_args,
-    schedule_interval='0 8 * * *',
+    schedule_interval=None,
     catchup=False,
 )
+
 
 start_task = DummyOperator(task_id="Start", dag=datapipeline_dag)
 end_task = DummyOperator(task_id="End", dag=datapipeline_dag)
 
-sample_task = PythonOperator(
-    task_id="sample_task",
+
+read_csvdata = PythonOperator(
+    task_id="read_csvdata",
     dag=datapipeline_dag,
     provide_context=True,
-    python_callable=sample_test_task,
-    op_kwargs={
-        'sample_variable': sample_variable,
-    },
+    python_callable=read_csv_data,
 )
 
-start_task >> sample_task >> end_task
+
+split_csvdata = PythonOperator(
+    task_id="split_csvdata",
+    dag=datapipeline_dag,
+    provide_context=True,
+    python_callable=split_csv_data,
+)
+split_csvdata_by_date = PythonOperator(
+    task_id="split_csvdata_by_date",
+    dag=datapipeline_dag,
+    provide_context=True,
+    python_callable=split_csv_data_by_date,
+)
+
+
+start_task >> read_csvdata >> split_csvdata
+split_csvdata >> split_csvdata_by_date >> end_task
